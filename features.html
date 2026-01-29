@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DIVAARA – AI Fit Scan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white h-screen flex items-center justify-center">
+
+  <!-- CENTER CARD -->
+  <div class="w-[360px] max-w-full px-6 text-center">
+
+    <!-- BRAND -->
+    <h1 class="text-3xl font-semibold tracking-tight mb-3">
+      DIVAARA
+    </h1>
+
+    <p class="text-sm text-neutral-400 mb-10">
+      AI Fit & Style Scanner
+    </p>
+
+    <!-- VALUE TEXT -->
+    <div class="space-y-3 mb-12">
+      <p class="text-base">
+        Get your body fit profile in under 10 seconds
+      </p>
+
+      <p class="text-xs text-neutral-400 leading-relaxed">
+        No photos are stored.  
+        Scan happens securely and privately.
+      </p>
+    </div>
+
+    <!-- SCAN BUTTON -->
+    <button
+      id="startScan"
+      class="w-full py-4 rounded-2xl bg-white text-black font-semibold text-base active:scale-95 transition">
+      Start Scan
+    </button>
+
+    <!-- CAMERA NOTE -->
+    <p class="text-xs text-neutral-500 mt-6">
+      Camera access required
+    </p>
+
+  </div>
+
+<script>
+  // ONLY REDIRECT — NOTHING ELSE
+  document.getElementById("startScan").addEventListener("click", () => {
+    window.location.href = "main.html";
+  });
+</script>
+
+</body>
+</html>

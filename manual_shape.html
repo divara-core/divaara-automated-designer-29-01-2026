@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>DIVAARA – Silhouette Refinement</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+        .fade { animation: fade 0.8s ease-out both; }
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .gold-border { border: 1px solid rgba(212, 175, 55, 0.3); }
+        .serif { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+
+<body class="text-[#E6D8A3] bg-gradient-to-b from-[#0e0e0e] via-[#050505] to-black min-h-screen py-12 px-6">
+
+    <div class="max-w-4xl mx-auto fade">
+        <div class="flex flex-col items-center text-center mb-12">
+            <img src="divaara logo.png" class="w-24 mb-6" alt="DIVAARA Logo" />
+            <h1 class="text-4xl serif text-[#D4AF37] tracking-wide">Refine Your Silhouette</h1>
+            <p class="mt-2 text-[10px] tracking-[0.3em] text-gray-500 uppercase">Manual Override & Precision Tuning</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start">
+            
+            <div class="bg-white/5 backdrop-blur-sm p-8 rounded-2xl gold-border">
+                <h3 class="text-[#D4AF37] text-sm tracking-widest font-bold uppercase mb-8">Dimensions</h3>
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] tracking-[0.2em] text-gray-500 uppercase mb-2 block ml-1">Shoulder Width</label>
+                        <input type="number" id="shoulder" step="0.1" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-[#D4AF37] outline-none focus:border-[#D4AF37]" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] tracking-[0.2em] text-gray-500 uppercase mb-2 block ml-1">Waist Width</label>
+                        <input type="number" id="waist" step="0.1" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-[#D4AF37] outline-none focus:border-[#D4AF37]" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] tracking-[0.2em] text-gray-500 uppercase mb-2 block ml-1">Hip Width</label>
+                        <input type="number" id="hips" step="0.1" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-[#D4AF37] outline-none focus:border-[#D4AF37]" />
+                    </div>
+                    <button onclick="calculateShape()" class="w-full bg-[#D4AF37] text-black font-bold py-4 rounded-xl tracking-[0.2em] hover:bg-[#E6D8A3] transition-all text-xs">
+                        RE-ANALYZE SILHOUETTE
+                    </button>
+                </div>
+            </div>
+
+            <div id="resultBox" class="flex flex-col bg-white/5 backdrop-blur-md p-8 rounded-2xl gold-border border-t-4 border-t-[#D4AF37]">
+                <div class="text-center mb-8">
+                    <span class="text-[10px] tracking-[0.4em] text-gray-500 uppercase">Analysis Result</span>
+                    <h2 id="shapeResult" class="text-5xl serif text-[#D4AF37] mt-4 mb-2 italic">---</h2>
+                    <p id="secondaryShape" class="text-xs tracking-widest text-gray-400 italic">Calculating ratios...</p>
+                </div>
+
+                <div class="space-y-6 pt-6 border-t border-white/10">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+                            <p class="text-[9px] text-gray-500 tracking-widest uppercase mb-1">Shoulder:Hip</p>
+                            <p id="srValue" class="text-xl text-[#D4AF37] font-light">--</p>
+                        </div>
+                        <div class="bg-black/30 p-4 rounded-xl border border-white/5">
+                            <p class="text-[9px] text-gray-500 tracking-widest uppercase mb-1">Waist:Hip</p>
+                            <p id="wrValue" class="text-xl text-[#D4AF37] font-light">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="ms.js"></script>
+    <script>
+        // Internal logic to handle the UI calculation
+        function calculateShape() {
+            const sh = parseFloat(document.getElementById('shoulder').value);
+            const wa = parseFloat(document.getElementById('waist').value);
+            const hi = parseFloat(document.getElementById('hips').value);
+            
+            if (!sh || !wa || !hi) return;
+
+            const SR = sh / hi; 
+            const WR = wa / hi; 
+            const SW = sh / wa;
+
+            let primary = "Rectangle";
+            let secondary = "Balanced";
+
+            // Thresholds matching your Python Backend logic
+            if (Math.abs(SR - 1.0) <= 0.08 && WR <= 0.75) {
+                primary = "Hourglass";
+                secondary = (SR < 1.0) ? "Pear-leaning" : "Top-leaning";
+            } 
+            else if (Math.abs(SR - 1.0) <= 0.10 && Math.abs(WR - 1.0) <= 0.10) {
+                primary = "Rectangle";
+                secondary = "Linear Taper";
+            } 
+            else if (SR >= 1.12 && WR >= 0.85) {
+                primary = "Inverted Triangle";
+                secondary = "Athletic Frame";
+            } 
+            else if (SR <= 0.90 && WR <= 0.85) {
+                primary = "Pear";
+                secondary = "Curved Base";
+            } 
+            else if (WR >= 1.05 && SW <= 1.05) {
+                primary = "Apple";
+                secondary = "Oval Frame";
+            }
+
+            document.getElementById('shapeResult').innerText = primary;
+            document.getElementById('secondaryShape').innerText = `Secondary: ${secondary}`;
+            document.getElementById('srValue').innerText = SR.toFixed(2);
+            document.getElementById('wrValue').innerText = WR.toFixed(2);
+        }
+    </script>
+</body>
+</html>

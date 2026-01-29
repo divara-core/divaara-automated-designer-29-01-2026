@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divara Scanner</title>
+
+  <!-- TFJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.21.0/dist/tf-backend-webgl.min.js"></script>
+
+  <!-- Pose Detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@0.0.6/dist/pose-detection.js"></script>
+
+  <!-- Body Segmentation -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-segmentation@0.0.4/dist/body-segmentation.js"></script>
+
+  <style>
+    body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
+    video, canvas { width: 320px; height: 420px; background: #000; border-radius: 12px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+
+  <div>
+    <video id="video" autoplay playsinline></video>
+    <button id="scanBtn">Scan</button>
+  </div>
+
+  <canvas id="output"></canvas>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("output");
+    const ctx = canvas.getContext("2d");
+
+    let detector = null;
+    let segmenter = null;
+
+    async function initCamera() {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      video.onloadedmetadata = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      };
+    }
+
+    async function loadModels() {
+      await tf.setBackend("webgl");
+      await tf.ready();
+
+      detector = await poseDetection.createDetector(
+        poseDetection.SupportedModels.BlazePose,
+        { runtime: "tfjs", modelType: "full" }
+      );
+
+      segmenter = await bodySegmentation.createSegmenter(
+        bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
+        { runtime: "tfjs" }
+      );
+
+      console.log("Models ready.");
+    }
+
+    async function scan() {
+      const poses = await detector.estimatePoses(video);
+      console.log("POSE =", poses);
+
+      const people = await segmenter.segmentPeople(video);
+      console.log("SEG =", people);
+
+      ctx.drawImage(video, 0, 0);
+
+      if (people[0]) {
+        bodySegmentation.drawMask(
+          canvas,
+          video,
+          people[0].mask,
+          { r:255, g:0, b:150, a:255 },
+          { r:0, g:0, b:0, a:0 },
+          0.7
+        );
+      }
+    }
+
+    document.getElementById("scanBtn").onclick = scan;
+
+    (async () => {
+      await initCamera();
+      await loadModels();
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>DIVAARA</title>
+
+  <style>
+    .fade {
+      animation: fade 0.8s ease-out both;
+    }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body class="text-[#E6D8A3] overflow-x-hidden
+             bg-gradient-to-b from-[#0e0e0e] via-[#050505] to-black">
+
+<!-- ================= HERO ================= -->
+<section class="w-full min-h-screen fade">
+
+  <!-- ================= DESKTOP ================= -->
+  <div class="hidden md:grid min-h-screen max-w-7xl mx-auto px-10
+              grid-cols-3 items-center">
+
+    <!-- MALE -->
+    <a href="camerapage-male.html" class="flex justify-start group">
+      <div class="relative w-[320px] h-[520px] rounded-2xl overflow-hidden
+                  transition duration-500 group-hover:scale-[1.02]">
+
+        <img src="male.jpg"
+             class="w-full h-full object-cover grayscale
+                    group-hover:grayscale-0 transition duration-500" />
+
+        <div class="absolute inset-0 bg-black/25
+                    flex flex-col items-center justify-end pb-7
+                    opacity-0 group-hover:opacity-100 transition">
+
+          <span class="tracking-[0.3em] text-xs text-[#D4AF37]">MEN</span>
+          <span class="mt-1 text-[11px] text-gray-300">
+            Fit · Style · Grooming
+          </span>
+        </div>
+      </div>
+    </a>
+
+    <!-- CENTER -->
+    <div class="flex flex-col items-center text-center justify-center">
+
+      <img src="divaara logo.png" class="w-32 mb-7" />
+
+      <h1 class="text-[44px] font-serif text-[#D4AF37] leading-tight tracking-wide">
+        AI That Frames <br> Royalty
+      </h1>
+
+      <p class="mt-6 max-w-md text-gray-300 leading-relaxed text-sm">
+        Precision-driven fashion intelligence designed to understand
+        your body and elevate your personal style.
+      </p>
+
+      <p class="mt-4 text-xs tracking-wide text-gray-400">
+        Built with advanced AI & computer vision
+      </p>
+
+      <div class="mt-12 flex items-center gap-6
+                  text-[11px] tracking-[0.25em] text-gray-500">
+        <span class="w-12 h-px bg-[#D4AF37]/30"></span>
+        CHOOSE YOUR EXPERIENCE
+        <span class="w-12 h-px bg-[#D4AF37]/30"></span>
+      </div>
+
+    </div>
+
+    <!-- FEMALE -->
+    <a href="features.html" class="flex justify-end group">
+      <div class="relative w-[320px] h-[520px] rounded-2xl overflow-hidden
+                  transition duration-500 group-hover:scale-[1.02]">
+
+        <img src="female.jpg"
+             class="w-full h-full object-cover grayscale
+                    group-hover:grayscale-0 transition duration-500" />
+
+        <div class="absolute inset-0 bg-black/25
+                    flex flex-col items-center justify-end pb-7
+                    opacity-0 group-hover:opacity-100 transition">
+
+          <span class="tracking-[0.3em] text-xs text-[#D4AF37]">WOMEN</span>
+          <span class="mt-1 text-[11px] text-gray-300">
+            Fit · Style · Beauty
+          </span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ================= MOBILE ================= -->
+  <div class="md:hidden px-6 py-10 flex flex-col items-center text-center fade">
+
+    <img src="divaara logo.png" class="w-28 mb-5" />
+
+    <h1 class="text-3xl font-serif text-[#D4AF37] leading-tight">
+      AI That Frames Royalty
+    </h1>
+
+    <p class="mt-4 text-sm text-gray-300 leading-relaxed max-w-sm">
+      Precision-driven fashion intelligence built with advanced AI
+      and computer vision.
+    </p>
+
+    <p class="mt-4 text-xs tracking-wide text-gray-400">
+      Built with advanced AI & computer vision
+    </p>
+
+    <div class="mt-8 text-[11px] tracking-[0.25em] text-gray-500">
+      CHOOSE YOUR EXPERIENCE
+    </div>
+
+    <!-- MALE -->
+    <a href="camerapage-male.html" class="w-full mt-6">
+      <div class="relative h-[340px] rounded-2xl overflow-hidden">
+        <img src="male.jpg" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-black/30
+                    flex flex-col items-center justify-end pb-5">
+          <span class="tracking-[0.3em] text-xs text-[#D4AF37]">MEN</span>
+          <span class="text-[11px] text-gray-300 mt-1">
+            Fit · Style · Grooming
+          </span>
+        </div>
+      </div>
+    </a>
+
+    <!-- FEMALE -->
+    <a href="camerapage-female.html" class="w-full mt-7">
+      <div class="relative h-[340px] rounded-2xl overflow-hidden">
+        <img src="female.jpg" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-black/30
+                    flex flex-col items-center justify-end pb-5">
+          <span class="tracking-[0.3em] text-xs text-[#D4AF37]">WOMEN</span>
+          <span class="text-[11px] text-gray-300 mt-1">
+            Fit · Style · Beauty
+          </span>
+        </div>
+      </div>
+    </a>
+
+    <p class="mt-10 text-[11px] text-gray-500">
+      Privacy-first · No images stored
+    </p>
+
+  </div>
+
+</section>
+
+</body>
+</html>

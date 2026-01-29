@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DIVAARA | Unified Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+
+    <style>
+        body { 
+            background-color: #000; 
+            -webkit-text-size-adjust: 100%; 
+            touch-action: manipulation;
+            font-family: 'Helvetica Neue', sans-serif;
+            overflow: hidden;
+        }
+
+        /* ================= SHARED VIDEO STYLES ================= */
+        /* Removed video selector as Tailwind handles it */
+        .video-dim { opacity: 0.3 !important; filter: blur(4px); }
+
+        /* ================= MODE 1: BODY SILHOUETTE STYLES ================= */
+       .sil-wrapper {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 260px;          /* ⬅️ increased */
+    height: 520px;         /* ⬅️ increased */
+    max-height: 80vh;      /* ⬅️ prevents overflow on small screens */
+    z-index: 20;
+    pointer-events: none;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.6));
+    animation: breathe 6s ease-in-out infinite;
+}
+
+        
+        @keyframes breathe { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.6; } }
+
+        .sil-part {
+            position: absolute; inset: 0;
+            background-size: contain; background-repeat: no-repeat; background-position: center top;
+            transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        /* Clip paths to separate body zones */
+        .part-shoulders { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); transform: scaleX(var(--s-scale, 1)); }
+        .part-waist { clip-path: polygon(0 45%, 100% 45%, 100% 68%, 0 68%); transform: scaleX(var(--w-scale, 1)); }
+        .part-hips { clip-path: polygon(0 68%, 100% 68%, 100% 100%, 0 100%); transform: scaleX(var(--h-scale, 1)); }
+
+        .scan-line {
+            position: absolute; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            z-index: 50; animation: scan 2.5s ease-in-out infinite; display: none;
+            box-shadow: 0 0 15px #10b981;
+        }
+        @keyframes scan { 0% { top: 10%; opacity: 0; } 50% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
+
+        /* ================= MODE 2: SKIN FACE GUIDE STYLES ================= */
+        .face-scrim {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.6);
+            /* Cut out an oval in the center */
+            mask-image: radial-gradient(ellipse 140px 180px at 50% 45%, transparent 100%, black 100%);
+            -webkit-mask-image: radial-gradient(ellipse 140px 180px at 50% 45%, transparent 100%, black 100%);
+            pointer-events: none;
+        }
+        .face-oval {
+            position: absolute; top: 45%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px; height: 360px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50% / 45%;
+            transition: all 0.4s ease;
+            z-index: 20;
+        }
+        .face-oval.locked {
+            border-color: #10b981; border-width: 4px;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        /* ================= UI TRANSITIONS ================= */
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.5s ease; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+
+<body class="text-white">
+
+    <div id="view-home" class="fixed inset-0 flex flex-col items-center justify-center p-6 bg-neutral-950 z-50">
+        <h1 class="text-5xl font-black italic tracking-tighter mb-2 bg-gradient-to-r from-white to-neutral-500 bg-clip-text text-transparent">DIVAARA</h1>
+        <p class="text-xs text-neutral-500 tracking-[0.2em] mb-12 uppercase">Unified AI Intelligence</p>
+
+        <div class="grid gap-4 w-full max-w-sm">
+            <button onclick="switchMode('body')" class="group relative overflow-hidden bg-neutral-900 border border-neutral-800 p-8 rounded-2xl hover:border-neutral-600 transition-all text-left">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                    <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C13.1 2 14 2.9 14 4S13.1 6 12 6 10 5.1 10 4 10.9 2 12 2M17 13H15V22H13V15H11V22H9V13H7C5.9 13 5 12.1 5 11V7H7V4H17V7H19V11C19 12.1 18.1 13 17 13Z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-1 group-hover:text-green-400 transition">Body Architecture</h3>
+                <p class="text-xs text-neutral-500">Silhouette analysis & shape classification</p>
+            </button>
+
+            <button onclick="switchMode('skin')" class="group relative overflow-hidden bg-neutral-900 border border-neutral-800 p-8 rounded-2xl hover:border-neutral-600 transition-all text-left">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                    <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12,2C13.11,2 14,2.9 14,4C14,5.11 13.11,6 12,6C10.9,6 10,5.11 10,4C10,2.9 10.9,2 12,2M12,22A6,6 0 0,1 6,16H8A4,4 0 0,0 12,20A4,4 0 0,0 16,16H18A6,6 0 0,1 12,22M12,8C14.21,8 16,9.79 16,12H18C18,8.69 15.31,6 12,6C8.69,6 6,8.69 6,12H8C8,9.79 9.79,8 12,8Z" /></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-1 group-hover:text-green-400 transition">Skin Profile</h3>
+                <p class="text-xs text-neutral-500">Tone, undertone & face geometry</p>
+            </button>
+        </div>
+    </div>
+
+    <div id="view-scanner" class="fixed inset-0 hidden bg-black">
+        <video id="webcam" autoplay playsinline muted class="absolute inset-0 w-full h-full object-contain scale-x-[-1] transition-opacity duration-700 ease-out"></video>
+
+        <div id="overlay-body" class="absolute inset-0 hidden pointer-events-none">
+            <div class="scan-line" id="body-scanline"></div>
+            <div class="sil-wrapper">
+                <div class="sil-part part-shoulders"></div>
+                <div class="sil-part part-waist"></div>
+                <div class="sil-part part-hips"></div>
+            </div>
+            <div id="body-countdown" class="absolute inset-0 flex items-center justify-center text-9xl font-black bg-black/40 hidden z-50">3</div>
+        </div>
+
+        <div id="overlay-skin" class="absolute inset-0 hidden pointer-events-none">
+            <div class="face-scrim"></div>
+            <div id="skin-guide" class="face-oval"></div>
+            <div class="absolute bottom-24 left-10 right-10">
+                <div class="h-1 w-full bg-neutral-800/50 rounded-full overflow-hidden backdrop-blur-sm">
+                    <div id="skin-progress" class="h-full bg-green-500 w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="exitScanner()" class="absolute top-6 left-6 z-50 p-3 bg-black/20 backdrop-blur-md rounded-full border border-white/10 text-white hover:bg-white/10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+
+        <div class="absolute bottom-8 left-0 right-0 px-6 flex flex-col items-center gap-4 z-40">
+            <div id="status-text" class="px-5 py-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-xs font-medium uppercase tracking-wider transition-all">
+                Initializing...
+            </div>
+
+            <button id="btn-start-body" onclick="startBodySequence()" class="hidden w-full max-w-xs h-14 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform shadow-lg shadow-white/10">
+                START SCAN
+            </button>
+        </div>
+
+        <div id="result-card" class="absolute inset-x-4 bottom-4 bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl translate-y-[120%] transition-transform duration-500 z-50">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <p class="text-[10px] text-neutral-400 uppercase tracking-widest mb-1">Analysis Complete</p>
+                    <h2 id="res-title" class="text-3xl font-bold text-white leading-none">---</h2>
+                </div>
+                <div class="h-10 w-10 bg-green-500 rounded-full flex items-center justify-center text-black">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+            </div>
+
+            <div id="res-metrics" class="grid grid-cols-2 gap-3 mb-6">
+                </div>
+
+            <button onclick="resetScanner()" class="w-full py-4 bg-neutral-800 hover:bg-neutral-700 rounded-xl font-bold text-sm transition-colors">
+                NEW SCAN
+            </button>
+        </div>
+    </div>
+
+    <canvas id="capture-canvas" class="hidden"></canvas>
+
+    
+    <script src="app.js"></script>
+</body>
+</html>
